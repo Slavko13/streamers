@@ -3,6 +3,7 @@ package com.streamers.app.controller.auth;
 import com.streamers.app.dto.auth.TokenResponse;
 import com.streamers.app.dto.auth.UserDto;
 
+import com.streamers.app.utils.EmailValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
@@ -103,8 +105,14 @@ public class KeyCloakController
         map.add("password", userDto.getPassword());
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, new HttpHeaders());
-        TokenResponse tokenResponse = restTemplate.postForObject(authServerUrl, request, TokenResponse.class);
 
+        TokenResponse tokenResponse;
+
+        try {
+            tokenResponse = restTemplate.postForObject(authServerUrl, request, TokenResponse.class);
+        } catch (HttpClientErrorException e) {
+            return new ResponseEntity<>(e.getStatusCode());
+        }
         return ResponseEntity.ok(tokenResponse);
     }
 }
