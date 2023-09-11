@@ -1,5 +1,6 @@
 package com.streamers.app.controller.auth;
 
+import com.streamers.app.controller.AbstractController;
 import com.streamers.app.dto.auth.TokenResponse;
 import com.streamers.app.dto.auth.UserDto;
 
@@ -20,10 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -31,8 +29,8 @@ import java.util.Collections;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/auth")
-public class KeyCloakController
+@RequestMapping("/api/v1")
+public class KeyCloakController extends AbstractController
 {
 
     @Value("${keycloak.auth-server-url}")
@@ -46,7 +44,6 @@ public class KeyCloakController
 
     @Value("${keycloak.credentials.secret}")
     private String clientSecret;
-
 
     private final RestTemplate restTemplate;
 
@@ -64,8 +61,9 @@ public class KeyCloakController
             @ApiResponse(responseCode = "400", description = "Неверные данные запроса"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
-    @PostMapping("/register")
+    @PostMapping("/auth/register")
     public ResponseEntity registerUser(@Parameter(name = "Интерфейс для создания пользователя", required = true) @RequestBody UserDto userDto) {
+        System.out.println(getCurrentUsername());
         UserRepresentation user = new UserRepresentation();
         user.setUsername(userDto.getUsername());
         user.setEmail(userDto.getEmail());
@@ -92,7 +90,7 @@ public class KeyCloakController
     }
 
 
-    @PostMapping("/login")
+    @PostMapping("/auth/login")
     @Operation(summary = "Регистрация", description = "Этот метод отвечает за логин и получение токена пользователя.")
     public ResponseEntity<TokenResponse> authenticate(@Parameter(name = "Интерфейс для аунтитефикации пользователя", required = true) @RequestBody UserDto userDto) {
         String authServerUrl = "http://localhost:8081/auth/realms/" + realm + "/protocol/openid-connect/token";
@@ -115,4 +113,16 @@ public class KeyCloakController
         }
         return ResponseEntity.ok(tokenResponse);
     }
+
+    @GetMapping("/admin/userinfo")
+    public String getUserInfoAdmin() {
+        return "Hello, " + getCurrentUsername();
+    }
+
+    @GetMapping("/user/userinfo")
+    public String getUserInfo() {
+        return "Hello, " + getCurrentUsername();
+    }
+
+
 }
