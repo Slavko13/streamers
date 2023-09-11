@@ -29,7 +29,7 @@ import java.util.Collections;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/v1")
 public class KeyCloakController extends AbstractController
 {
 
@@ -61,7 +61,7 @@ public class KeyCloakController extends AbstractController
             @ApiResponse(responseCode = "400", description = "Неверные данные запроса"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
-    @PostMapping("/register")
+    @PostMapping("/auth/register")
     public ResponseEntity registerUser(@Parameter(name = "Интерфейс для создания пользователя", required = true) @RequestBody UserDto userDto) {
         System.out.println(getCurrentUsername());
         UserRepresentation user = new UserRepresentation();
@@ -90,7 +90,7 @@ public class KeyCloakController extends AbstractController
     }
 
 
-    @PostMapping("/login")
+    @PostMapping("/auth/login")
     @Operation(summary = "Регистрация", description = "Этот метод отвечает за логин и получение токена пользователя.")
     public ResponseEntity<TokenResponse> authenticate(@Parameter(name = "Интерфейс для аунтитефикации пользователя", required = true) @RequestBody UserDto userDto) {
         String authServerUrl = "http://localhost:8081/auth/realms/" + realm + "/protocol/openid-connect/token";
@@ -114,7 +114,12 @@ public class KeyCloakController extends AbstractController
         return ResponseEntity.ok(tokenResponse);
     }
 
-    @GetMapping("/userinfo")
+    @GetMapping("/admin/userinfo")
+    public String getUserInfoAdmin() {
+        return "Hello, " + getCurrentUsername();
+    }
+
+    @GetMapping("/user/userinfo")
     public String getUserInfo() {
         return "Hello, " + getCurrentUsername();
     }
